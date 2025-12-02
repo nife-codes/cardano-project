@@ -162,3 +162,57 @@ def track_journey(request, batch_id):
             'success': False,
             'error': str(e)
         }, status=status.HTTP_400_BAD_REQUEST)
+      
+@api_view(['POST'])
+def transfer_batch(request):
+    """
+    Endpoint for transferring batch between verified entities
+    Distributor or Pharmacy calls this after receiving the NFT
+    """
+    try:
+        from .blockfrost_utils import verify_wallet_has_asset
+        
+        transfer_data = request.data
+        
+        # Get the batch
+        batch = Batch.objects.get(batch_id=transfer_data['batch_id'])
+        
+        # Verify the receiving wallet has the asset on-chain
+        if batch.policy_id and batch.asset_name:
+            verification = verify_wallet_has_asset(
+                transfer_data['to_wallet'],
+                batch.policy_id,
+                batch.asset_name
+            )
+            
+            if not verification.get('success') or not verification.get('has_asset'):
+                return Response({
+                    'success': False,
+                    'error': 'Asset not found in receiving wallet'
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Create transfer transaction record
+        Transaction.objects.create(
+            batch=batch,
+            transaction_type='TRANSFER',
+            from_wallet=transfer_data['from_wallet'],
+            to_wallet=transfer_data['to_wallet'],
+            tx_hash=transfer_data['tx_hash']
+        )
+        
+        return Response({
+            'success': True,
+            'message': 'Transfer recorded successfully',
+            'batch_id': batch.batch_id
+        }, status=status.HTTP_201_CREATED)
+        
+    except Batch.DoesNotExist:
+        return Response({
+            'success': False,
+            'error': 'Batch not found'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=status.HTTP_400_BAD_REQUEST)

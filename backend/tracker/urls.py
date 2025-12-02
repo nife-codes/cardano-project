@@ -14,4 +14,5 @@ urlpatterns = [
     path('mint/', views.mint_batch, name='mint-batch'),
     path('verify/<str:qr_code>/', views.verify_medicine, name='verify-medicine'),
     path('journey/<str:batch_id>/', views.track_journey, name='track-journey'),
+    path('transfer/', views.transfer_batch, name='transfer-batch'),
 ]
