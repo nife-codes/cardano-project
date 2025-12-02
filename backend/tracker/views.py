@@ -89,9 +89,16 @@ def verify_medicine(request, qr_code):
     Patient scans QR code, we return batch info + blockchain proof
     """
     try:
-        # Find batch by QR code
+        from .blockfrost_utils import get_asset_info
+        
         batch = Batch.objects.get(qr_code=qr_code)
         
+        # Get on-chain proof from Blockfrost
+        blockchain_data = None
+        if batch.policy_id and batch.asset_name:
+            result = get_asset_info(batch.policy_id, batch.asset_name)
+            if result['success']:
+                blockchain_data = result['data']
         
         return Response({
             'success': True,
@@ -103,7 +110,8 @@ def verify_medicine(request, qr_code):
             'composition': batch.composition,
             'verified': batch.nft_minted,
             'policy_id': batch.policy_id,
-            'asset_name': batch.asset_name
+            'asset_name': batch.asset_name,
+            'blockchain_proof': blockchain_data
         }, status=status.HTTP_200_OK)
         
     except Batch.DoesNotExist:
