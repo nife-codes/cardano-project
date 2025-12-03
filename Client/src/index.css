@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-deep: #1c57ff;
+  --color-primary-faint: #2563eb;
+  --color-green-100: #dcfce7;
+  --color-green-600: #2eb67d;
+  --color-red-900: #eb0606db;
+  --color-red-100: #fef2f2;
+
+  --color-accent-400: #f59e0b;
+  --color-accent-500: #d97706;
+
+  --color-success-400: #10b981;
+  --color-success-500: #059669;
+
+  /* --font-family-display: "Inter", "system-ui", sans-serif; */
+
+  --breakpoint-xs: 475px;
+  --breakpoint-3xl: 1920px;
+
+  --animate-bounce-slow: bounce 3s infinite;
+  --animate-pulse-slow: pulse 4s infinite;
+  --animate-float: float 6s ease-in-out infinite;
+}
+@layer base {
+  body {
+    /* font-family: "Rubik Bubbles", cursive; */
+  }
+}
+
+@layer utilities {
+  .bg-grid {
+    background-size: 30px 30px;
+    background-image: linear-gradient(to right, #0066cc 1px, transparent 1px),
+      linear-gradient(to bottom, #0066cc 1px, transparent 1px);
+  }
+}
