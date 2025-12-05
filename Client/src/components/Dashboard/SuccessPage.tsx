@@ -2,8 +2,8 @@ import { CheckCircle, Download, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const SuccessPage = () => (
-  <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-    <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-8">
+  <div className="min-h-screen bg-gray-50 flex items-center justify-center p-24">
+    <div className="bg-white rounded-xl shadow-lg  w-full p-8">
       {/* Success Header */}
       <div className="text-center mb-6">
         <h2 className="text-lg font-semibold text-gray-800 mb-8">
@@ -19,7 +19,7 @@ const SuccessPage = () => (
 
         <p className="text-sm text-gray-600 mb-6">
           Your batch has been registered on the{" "}
-          <span className="text-blue-600">Caspian Blockchain</span>
+          <span className="text-blue-600">Cardano Blockchain</span>
         </p>
       </div>
 
@@ -101,8 +101,8 @@ const SuccessPage = () => (
       </div>
 
       {/* Action Buttons */}
-      <div className="space-y-3">
-        <Link to="/batch-detail">
+      <div className=" flex  items-center gap-6">
+        <Link to="/batch-detail" className=" w-full">
           <button
             //   onClick={() => setCurrentPage("details")}
             className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"

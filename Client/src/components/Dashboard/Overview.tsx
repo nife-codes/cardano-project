@@ -46,22 +46,22 @@ const Overview = () => {
       id: "BATCH-001",
       composition: "Paracetamol 500mg",
       expiryDate: "2025-12-15",
-      status: "Active",
-      views: 1245,
+      status: "Minted",
+      views: 1,
     },
     {
       id: "BATCH-002",
       composition: "Amoxicillin 250mg",
       expiryDate: "2026-03-20",
       status: "Pending",
-      views: 892,
+      views: 0,
     },
     {
       id: "BATCH-003",
       composition: "Ibuprofen 400mg",
       expiryDate: "2025-08-10",
-      status: "Active",
-      views: 2103,
+      status: "In Transit",
+      views: 0,
     },
   ]);
 
@@ -127,7 +127,7 @@ const Overview = () => {
     },
     {
       id: 3,
-      title: "Pending Batches",
+      title: "Minted",
       value: pendingBatches,
       icon: Clock,
       color: "bg-yellow-500",
@@ -135,7 +135,7 @@ const Overview = () => {
     },
     {
       id: 4,
-      title: "Total Views",
+      title: "In Transit",
       value: totalViews.toLocaleString(),
       icon: TrendingUp,
       color: "bg-purple-500",
@@ -150,9 +150,7 @@ const Overview = () => {
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800">
-                Dashboard Overview
-              </h1>
+              <h1 className="text-xl font-bold text-gray-800">Dashboard</h1>
               <p className="text-sm text-gray-600 mt-1">PharmaCorp Ltd.</p>
             </div>
             <button
@@ -223,23 +221,20 @@ const Overview = () => {
             <table className="w-full">
               <thead className="bg-gray-50 p-6 border-b border-gray-200 ">
                 <tr>
-                  <th className="px-6 py-4 text-left text-[#314158] text-md font-semibold  uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-[#314158] text-sm font-semibold  uppercase tracking-wider">
                     Batch ID
                   </th>
-                  <th className="px-6 py-4 text-left text-[#314158] text-md font-semibold  uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-[#314158] text-sm font-semibold  uppercase tracking-wider">
                     Composition
                   </th>
-                  <th className="px-6 py-4 text-left text-[#314158] text-md font-semibold  uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-[#314158] text-sm font-semibold  uppercase tracking-wider">
                     Expiry Date
                   </th>
-                  <th className="px-6 py-4 text-left text-[#314158] text-md font-semibold  uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-[#314158] text-sm font-semibold  uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-4 text-left text-[#314158] text-md font-semibold  uppercase tracking-wider">
-                    Views
-                  </th>
-                  <th className="px-6 py-4 text-left text-[#314158] text-md font-semibold  uppercase tracking-wider">
-                    Actions2
+                  <th className="px-6 py-4 text-left text-[#314158] text-sm font-semibold  uppercase tracking-wider">
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -273,13 +268,9 @@ const Overview = () => {
                         {batch.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-700">
-                        {batch.views.toLocaleString()}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <button className="flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors">
+
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-[#0A0A0A]">
+                      <button className="flex items-center  font-medium transition-colors">
                         <Eye className="w-4 h-4 mr-1" />
                         View Details
                       </button>

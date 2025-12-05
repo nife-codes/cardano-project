@@ -1,6 +1,6 @@
 import bg from "../assets/signup-bg.jpg";
-import heroIcon from "../assets/hero-icon.png";
 import { useState } from "react";
+import VerificationIcon from "../components/Homepage/VerificationIcon";
 
 const SignUp = () => {
   const [role, setRole] = useState<"manufacturer" | "distributor" | "pharmacy">(
@@ -30,7 +30,7 @@ const SignUp = () => {
 
   return (
     <div
-      className="min-h-screen w-full relative flex items-center justify-center"
+      className="min-h-screen w-full relative flex items-center justify-center pt-32"
       style={{
         backgroundImage: `url(${bg})`,
         backgroundSize: "cover",
@@ -38,16 +38,14 @@ const SignUp = () => {
         backgroundRepeat: "no-repeat",
       }}
     >
-      {/* White blurred overlay */}
+      {/* Overlay */}
       <div className="absolute inset-0 bg-white/60 backdrop-blur-sm"></div>
 
       <div className="relative z-10 flex flex-col items-center w-full px-4">
         {/* Top Icon */}
-        <div className="flex items-center justify-center mb-4">
-          <div className="rounded-full bg-white p-3 shadow-md">
-            <div className="rounded-full bg-[#E6F0FF] p-2">
-              <img src={heroIcon} alt="icon" className="w-10 h-10" />
-            </div>
+        <div className=" flex justify-center h-32 w-32">
+          <div className="animate-bounce-slow animate-pulse-ring">
+            <VerificationIcon />
           </div>
         </div>
 
@@ -61,20 +59,45 @@ const SignUp = () => {
 
         {/* Card */}
         <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl p-6">
-          {/* Role Selector */}
+          {/* Role Label */}
           <p className="text-sm font-medium text-gray-600 mb-2">I am a</p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+          {/* MOBILE — SCROLLABLE ROW */}
+          <div className="flex sm:hidden gap-3 overflow-x-auto pb-1 no-scrollbar mb-6">
             {roles.map((r) => (
               <div
                 key={r.id}
                 onClick={() => setRole(r.id as any)}
-                className={`cursor-pointer border rounded-xl p-4 transition shadow-sm
+                className={`
+                  min-w-[130px] cursor-pointer border rounded-lg p-3 transition
+                  ${
+                    role === r.id
+                      ? "border-green-500 bg-green-50"
+                      : "border-gray-200"
+                  }
+                `}
+              >
+                <div className="text-xl mb-1">{r.icon}</div>
+                <p className="font-medium text-gray-800 text-sm">{r.title}</p>
+                <p className="text-[11px] text-gray-500">{r.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* DESKTOP / TABLET — GRID */}
+          <div className="hidden sm:grid grid-cols-3 gap-3 mb-6">
+            {roles.map((r) => (
+              <div
+                key={r.id}
+                onClick={() => setRole(r.id as any)}
+                className={`
+                  cursor-pointer border rounded-xl p-4 transition shadow-sm
                   ${
                     role === r.id
                       ? "border-green-500 bg-green-50"
                       : "border-gray-200 hover:bg-gray-50"
-                  }`}
+                  }
+                `}
               >
                 <div className="text-2xl mb-2">{r.icon}</div>
                 <p className="font-medium text-gray-800">{r.title}</p>
@@ -113,7 +136,7 @@ const SignUp = () => {
               className="w-full px-4 py-3 border border-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-200"
             />
 
-            {/* Confirm */}
+            {/* Confirm Password */}
             <input
               type="password"
               placeholder="Re-enter your password"

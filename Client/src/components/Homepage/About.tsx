@@ -1,311 +1,240 @@
-import { Shield, Users, Building2, Lock, Eye, BadgeCheck } from "lucide-react";
-// import bg from "../../assets/about-bg.jpg";
+import { useEffect } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
+
+import { Users, Building2, Lock, Eye, BadgeCheck } from "lucide-react";
+import VerificationIcon from "./VerificationIcon";
 
 const AboutPage = () => {
+  useEffect(() => {
+    AOS.init({ duration: 800, once: true });
+  }, []);
+
   return (
-    <div
-      className="min-h-screen bg-gray-50 relative "
-      //   style={{
-      //     backgroundImage: `url(${bg})`,
-      //     backgroundSize: "cover",
-      //     backgroundPosition: "center",
-      //     backgroundRepeat: "no-repeat",
-      //   }}
-    >
-      {/* Decorative DNA/Medical Pattern - Top Left */}
-      <div className="absolute top-0 left-0 w-32 h-32 opacity-20">
-        <svg viewBox="0 0 100 100" className="text-blue-400">
-          <circle cx="20" cy="20" r="3" fill="currentColor" />
-          <circle cx="40" cy="30" r="3" fill="currentColor" />
-          <circle cx="30" cy="50" r="3" fill="currentColor" />
-          <circle cx="50" cy="60" r="3" fill="currentColor" />
-          <line
-            x1="20"
-            y1="20"
-            x2="40"
-            y2="30"
-            stroke="currentColor"
-            strokeWidth="1"
-          />
-          <line
-            x1="40"
-            y1="30"
-            x2="30"
-            y2="50"
-            stroke="currentColor"
-            strokeWidth="1"
-          />
-          <line
-            x1="30"
-            y1="50"
-            x2="50"
-            y2="60"
-            stroke="currentColor"
-            strokeWidth="1"
-          />
-        </svg>
-      </div>
+    <div className="relative bg-gray-50 overflow-hidden">
+      {/* Medicine-themed background pattern */}
+      <div
+        className="absolute inset-0 opacity-10 "
+        style={{
+          backgroundImage:
+            "url('https://images.unsplash.com/photo-1580281658629-44a62f67c4f1?q=80&w=1200')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      />
 
-      {/* Decorative DNA/Medical Pattern - Top Right */}
-      <div className="absolute top-0 right-0 w-32 h-32 opacity-20">
-        <svg viewBox="0 0 100 100" className="text-blue-400">
-          <circle cx="80" cy="20" r="3" fill="currentColor" />
-          <circle cx="60" cy="30" r="3" fill="currentColor" />
-          <circle cx="70" cy="50" r="3" fill="currentColor" />
-          <circle cx="50" cy="60" r="3" fill="currentColor" />
-          <line
-            x1="80"
-            y1="20"
-            x2="60"
-            y2="30"
-            stroke="currentColor"
-            strokeWidth="1"
-          />
-          <line
-            x1="60"
-            y1="30"
-            x2="70"
-            y2="50"
-            stroke="currentColor"
-            strokeWidth="1"
-          />
-          <line
-            x1="70"
-            y1="50"
-            x2="50"
-            y2="60"
-            stroke="currentColor"
-            strokeWidth="1"
-          />
-        </svg>
-      </div>
-
-      <div className="max-w-6xl mx-auto px-4 py-12 relative">
-        {/* Header Section */}
-        <div className="text-center mb-16">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center">
-              <Shield className="w-8 h-8 text-white" />
+      {/* Curved Hero Section */}
+      <div className="relative bg-blue-600 text-white pb-24 pt-32 rounded-b-[70px] shadow-lg">
+        <div className="max-w-5xl mx-auto text-center px-4">
+          {/* Floating Shield Icon */}
+          <div className="w-full flex justify-center">
+            <div className="animate-bounce-slow animate-pulse-ring">
+              <VerificationIcon />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">
+
+          <h1
+            className="text-4xl md:text-5xl font-bold mb-4 mt-8"
+            data-aos="fade-up"
+          >
             About MediSure
           </h1>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Protecting patients worldwide by ensuring medicine authenticity
-            through blockchain technology and advanced verification systems
+          <p
+            className="text-white/90 max-w-2xl mx-auto text-lg"
+            data-aos="fade-up"
+            data-aos-delay="150"
+          >
+            Protecting patients worldwide with blockchain-powered medicine
+            verification and total transparency in the pharmaceutical supply
+            chain.
           </p>
         </div>
+      </div>
 
-        {/* Our Mission Section */}
-        <div className="bg-white rounded-lg shadow-sm p-8 mb-12">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4 text-center">
+      {/* Main Content */}
+      <div className="max-w-6xl mx-auto px-4 -mt-16 relative">
+        {/* Card: Mission */}
+        <div
+          className="bg-white rounded-2xl shadow-xl p-8 mb-12"
+          data-aos="fade-up"
+        >
+          <h2 className="text-3xl font-semibold mb-4 text-center text-gray-800">
             Our Mission
           </h2>
           <p className="text-gray-600 text-center max-w-3xl mx-auto">
-            At MediSure, we are committed to safeguarding public health by
-            providing a transparent and secure platform for medicine
-            verification. We leverage blockchain technology and cutting-edge
-            solutions to ensure that every medication reaches patients safely,
-            eliminating counterfeit drugs and building trust across the
-            pharmaceutical supply chain.
+            We are committed to eliminating counterfeit medicines globally by
+            empowering patients, pharmacies, manufacturers, and regulators with
+            a secure and transparent verification system.
           </p>
         </div>
 
-        {/* Why It Matters Section */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-8 text-center">
+        {/* Stats Section */}
+        <div className="mb-16">
+          <h2
+            className="text-3xl font-semibold text-center text-gray-800 mb-10"
+            data-aos="fade-up"
+          >
             Why It Matters
           </h2>
-          <p className="text-gray-600 text-center mb-8">
-            Counterfeit medicines are a global health crisis. MediSure provides
-            transparency and trust.
-          </p>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {/* Stat 1 */}
-            <div className="bg-red-50 rounded-lg p-6 text-center">
-              <div className="text-4xl font-bold text-red-600 mb-2">10%</div>
-              <p className="text-sm text-gray-700">
-                of medicines in low- and middle-income countries are substandard
-                or counterfeit
+            <div
+              className="bg-red-50 rounded-xl p-6 text-center shadow-sm"
+              data-aos="fade-up"
+            >
+              <h3 className="text-4xl font-bold text-red-600">10%</h3>
+              <p className="text-gray-700 mt-2">
+                of medicines in LMIC countries are substandard or fake
               </p>
             </div>
 
-            {/* Stat 2 */}
-            <div className="bg-orange-50 rounded-lg p-6 text-center">
-              <div className="text-4xl font-bold text-orange-600 mb-2">1M+</div>
-              <p className="text-sm text-gray-700">
-                deaths annually due to counterfeit medicines globally
+            <div
+              className="bg-orange-50 rounded-xl p-6 text-center shadow-sm"
+              data-aos="fade-up"
+              data-aos-delay="200"
+            >
+              <h3 className="text-4xl font-bold text-orange-600">1M+</h3>
+              <p className="text-gray-700 mt-2">
+                deaths annually due to fake medications
               </p>
             </div>
 
-            {/* Stat 3 */}
-            <div className="bg-blue-50 rounded-lg p-6 text-center">
-              <div className="text-4xl font-bold text-blue-600 mb-2">$200B</div>
-              <p className="text-sm text-gray-700">
-                annual market for counterfeit pharmaceutical products
+            <div
+              className="bg-blue-50 rounded-xl p-6 text-center shadow-sm"
+              data-aos="fade-up"
+              data-aos-delay="400"
+            >
+              <h3 className="text-4xl font-bold text-blue-600">$200B</h3>
+              <p className="text-gray-700 mt-2">
+                yearly counterfeit drug market worldwide
               </p>
             </div>
           </div>
         </div>
 
-        {/* How We Help Section */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4 text-center">
+        {/* How We Help */}
+        <div className="mb-16">
+          <h2
+            className="text-3xl font-semibold text-gray-800 text-center mb-8"
+            data-aos="fade-up"
+          >
             How We Help
           </h2>
-          <p className="text-gray-600 text-center mb-8">
-            MediSure provides a comprehensive platform for medication
-            verification and traceability
-          </p>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* For Patients */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="grid md:grid-cols-2 gap-10">
+            {/* Patients */}
+            <div
+              className="bg-white p-8 rounded-xl shadow-md"
+              data-aos="fade-up"
+            >
               <div className="flex items-center mb-4">
-                <Users className="w-6 h-6 text-green-500 mr-2" />
-                <h3 className="text-xl font-semibold text-gray-800">
-                  For Patients
-                </h3>
+                <Users className="text-green-600 w-6 h-6 mr-2" />
+                <h3 className="text-xl font-semibold">For Patients</h3>
               </div>
-              <ul className="space-y-3">
-                <li className="flex items-start">
-                  <span className="text-green-500 mr-2">✓</span>
-                  <span className="text-gray-600">
-                    Quick medicine verification through QR scanning
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-500 mr-2">✓</span>
-                  <span className="text-gray-600">
-                    View detailed medication history and authenticity
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-500 mr-2">✓</span>
-                  <span className="text-gray-600">
-                    Report suspicious medications easily
-                  </span>
-                </li>
+
+              <ul className="space-y-3 text-gray-700">
+                <li>✓ Instant medicine verification via QR scan</li>
+                <li>✓ Full medication history & authenticity check</li>
+                <li>✓ Report suspicious drugs instantly</li>
               </ul>
             </div>
 
-            {/* For Manufacturers & Distributors */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            {/* Manufacturers */}
+            <div
+              className="bg-white p-8 rounded-xl shadow-md"
+              data-aos="fade-up"
+              data-aos-delay="200"
+            >
               <div className="flex items-center mb-4">
-                <Building2 className="w-6 h-6 text-blue-500 mr-2" />
-                <h3 className="text-xl font-semibold text-gray-800">
-                  For Manufacturers & Distributors
+                <Building2 className="text-blue-600 w-6 h-6 mr-2" />
+                <h3 className="text-xl font-semibold">
+                  Manufacturers & Distributors
                 </h3>
               </div>
-              <ul className="space-y-3">
-                <li className="flex items-start">
-                  <span className="text-blue-500 mr-2">✓</span>
-                  <span className="text-gray-600">
-                    Track products throughout the supply chain
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-blue-500 mr-2">✓</span>
-                  <span className="text-gray-600">
-                    Real-time updates on medication distribution
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-blue-500 mr-2">✓</span>
-                  <span className="text-gray-600">
-                    Streamline regulatory compliance
-                  </span>
-                </li>
+
+              <ul className="space-y-3 text-gray-700">
+                <li>✓ Full supply-chain tracking</li>
+                <li>✓ Real-time logistics updates</li>
+                <li>✓ Seamless regulatory compliance</li>
               </ul>
             </div>
           </div>
         </div>
 
-        {/* Powered by Blockchain Section */}
-        <div className="bg-linear-to-br from-purple-50 to-blue-50 rounded-lg p-8 mb-12">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4 text-center">
+        {/* Blockchain Section */}
+        <div
+          className="bg-linear-to-br from-purple-50 to-blue-50 p-10 rounded-2xl shadow-xl mb-20"
+          data-aos="fade-up"
+        >
+          <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">
             Powered by Blockchain
           </h2>
-          <p className="text-gray-600 text-center mb-8 max-w-2xl mx-auto">
-            We use blockchain technology to create an immutable and transparent
-            ledger for all medication records
+          <p className="text-gray-700 max-w-2xl mx-auto text-center mb-12">
+            Every medication entry is recorded on an immutable ledger, ensuring
+            trust, transparency, and ultimate safety.
           </p>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Immutable Records */}
-            <div className="text-center">
-              <div className="flex justify-center mb-3">
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                  <Lock className="w-6 h-6 text-purple-600" />
-                </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center" data-aos="fade-up">
+              <div className="bg-purple-100 w-14 h-14 mx-auto rounded-full flex items-center justify-center mb-3">
+                <Lock className="text-purple-600" />
               </div>
-              <h3 className="font-semibold text-gray-800 mb-2">
-                Immutable Records
-              </h3>
-              <p className="text-sm text-gray-600">
-                Once data is recorded, it cannot be altered or deleted, ensuring
-                complete integrity
+              <h3 className="font-semibold text-gray-800">Immutable Records</h3>
+              <p className="text-sm text-gray-600 mt-2">
+                Data cannot be modified once stored.
               </p>
             </div>
 
-            {/* Transparent Tracking */}
-            <div className="text-center">
-              <div className="flex justify-center mb-3">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                  <Eye className="w-6 h-6 text-blue-600" />
-                </div>
+            <div
+              className="text-center"
+              data-aos="fade-up"
+              data-aos-delay="200"
+            >
+              <div className="bg-blue-100 w-14 h-14 mx-auto rounded-full flex items-center justify-center mb-3">
+                <Eye className="text-blue-600" />
               </div>
-              <h3 className="font-semibold text-gray-800 mb-2">
+              <h3 className="font-semibold text-gray-800">
                 Transparent Tracking
               </h3>
-              <p className="text-sm text-gray-600">
-                Every stakeholder can verify the authenticity and journey of
-                medications in real-time
+              <p className="text-sm text-gray-600 mt-2">
+                Every stakeholder sees the medicine journey.
               </p>
             </div>
 
-            {/* Secure Verification */}
-            <div className="text-center">
-              <div className="flex justify-center mb-3">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                  <BadgeCheck className="w-6 h-6 text-green-600" />
-                </div>
+            <div
+              className="text-center"
+              data-aos="fade-up"
+              data-aos-delay="400"
+            >
+              <div className="bg-green-100 w-14 h-14 mx-auto rounded-full flex items-center justify-center mb-3">
+                <BadgeCheck className="text-green-600" />
               </div>
-              <h3 className="font-semibold text-gray-800 mb-2">
+              <h3 className="font-semibold text-gray-800">
                 Secure Verification
               </h3>
-              <p className="text-sm text-gray-600">
-                Cryptographic security ensures that only authorized parties can
-                update medication records
+              <p className="text-sm text-gray-600 mt-2">
+                Cryptographic signatures protect data integrity.
               </p>
             </div>
           </div>
         </div>
 
-        {/* CTA Section */}
-        <div className="bg-blue-600 rounded-lg p-8 text-center text-white">
-          <h2 className="text-2xl font-bold mb-4">
+        {/* CTA */}
+        <div
+          className="bg-blue-600 text-white text-center p-10 rounded-2xl shadow-xl mb-16"
+          data-aos="fade-up"
+        >
+          <h2 className="text-3xl font-bold mb-4">
             Ready to Verify Your Medicine?
           </h2>
-          <p className="mb-6 max-w-2xl mx-auto">
-            Join thousands of patients and healthcare providers who trust
-            MediSure to ensure medication safety and authenticity
+          <p className="max-w-xl mx-auto mb-6 text-white/90">
+            Join thousands of users who trust MediSure for safe and authentic
+            medications.
           </p>
-          <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+
+          <button className="bg-white text-blue-600 px-10 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
             Get Started
           </button>
-        </div>
-
-        {/* Footer Links */}
-        <div className="mt-12 text-center">
-          <div className="flex justify-center space-x-6 text-sm text-gray-600">
-            <button className="hover:text-gray-800">About Us</button>
-            <button className="hover:text-gray-800">Privacy Policy</button>
-            <button className="hover:text-gray-800">Terms of Service</button>
-            <button className="hover:text-gray-800">Contact</button>
-          </div>
         </div>
       </div>
     </div>

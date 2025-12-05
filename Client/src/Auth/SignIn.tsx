@@ -1,7 +1,7 @@
 import bg from "../assets/signin-banner.jpg";
-import heroIcon from "../assets/hero-icon.png";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import VerificationIcon from "../components/Homepage/VerificationIcon";
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
@@ -17,7 +17,7 @@ const SignIn = () => {
 
   return (
     <div
-      className="min-h-screen w-full relative flex items-center justify-center"
+      className="min-h-screen w-full relative flex items-center justify-center pt-24"
       style={{
         backgroundImage: `url(${bg})`,
         backgroundSize: "cover",
@@ -31,14 +31,18 @@ const SignIn = () => {
       {/* Center column for icon + card + demo box */}
       <div className="relative z-10 flex flex-col items-center w-full px-4">
         {/* circular icon */}
-        <div className="flex items-center justify-center mb-4">
+        {/* <div className="flex items-center justify-center mb-4">
           <div className="rounded-full bg-white p-3 shadow-md">
             <div className="rounded-full bg-[#E6F0FF] p-2">
               <img src={heroIcon} alt="icon" className="w-10 h-10" />
             </div>
           </div>
+        </div> */}
+        <div className=" flex justify-center h-32 w-32">
+          <div className="animate-bounce-slow animate-pulse-ring">
+            <VerificationIcon />
+          </div>
         </div>
-
         {/* Heading */}
         <h2 className="text-xl md:text-2xl font-semibold text-gray-800">
           Welcome Back

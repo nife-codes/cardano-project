@@ -2,7 +2,7 @@ import { Calendar, Download, Eye, Package } from "lucide-react";
 
 const BatchDetail = () => {
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-gray-50 p-24">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
@@ -24,7 +24,7 @@ const BatchDetail = () => {
               <p className="text-sm text-gray-600">Paracetamol 500mg</p>
             </div>
             <span className="px-3 py-1 bg-green-100 text-green-700 text-sm font-semibold rounded-full">
-              Active
+              Minted
             </span>
           </div>
         </div>
@@ -170,7 +170,7 @@ const BatchDetail = () => {
                 chain
               </p>
               <button className="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
-                Initiate Transfer
+                Transfer Batch
               </button>
             </div>
           </div>
