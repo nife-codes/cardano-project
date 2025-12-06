@@ -10,7 +10,7 @@ SECRET_KEY = 'django-insecure-rbpyn$p_ec3l7y-(_*q+1a^24i1yopl&7&%fi%@vn-a5a!0lvu
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -101,3 +101,5 @@ REST_FRAMEWORK = {
 
 BLOCKFROST_PROJECT_ID = os.getenv('BLOCKFROST_PROJECT_ID', '')
 BLOCKFROST_NETWORK = 'testnet'
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
