@@ -40,13 +40,13 @@ def mint_batch(request):
     Joel will call this after NFT is minted on blockchain
     """
     try:
-        # Get batch data from request
+        
         batch_data = request.data
         
-        # Generate unique QR code
+        
         qr_code = str(uuid.uuid4())
         
-        # Create batch record
+        
         batch = Batch.objects.create(
             batch_id=batch_data['batch_id'],
             medicine_name=batch_data['medicine_name'],
@@ -61,7 +61,7 @@ def mint_batch(request):
             qr_code=qr_code
         )
         
-        # Create mint transaction record
+       
         Transaction.objects.create(
             batch=batch,
             transaction_type='MINT',
@@ -93,7 +93,7 @@ def verify_medicine(request, qr_code):
         
         batch = Batch.objects.get(qr_code=qr_code)
         
-        # Get on-chain proof from Blockfrost
+       
         blockchain_data = None
         if batch.policy_id and batch.asset_name:
             result = get_asset_info(batch.policy_id, batch.asset_name)
@@ -177,7 +177,7 @@ def transfer_batch(request):
         # Get the batch
         batch = Batch.objects.get(batch_id=transfer_data['batch_id'])
         
-        # Verify the receiving wallet has the asset on-chain
+        
         if batch.policy_id and batch.asset_name:
             verification = verify_wallet_has_asset(
                 transfer_data['to_wallet'],
