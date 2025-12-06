@@ -2,7 +2,11 @@
 
 Django REST API for the MediSure medicine track-and-trace system on Cardano.
 
-## HOW TO SET IT UP 
+## Live Deployment
+
+**Backend API:** https://medisure-backend-t5yr.onrender.com/api/
+
+## Local Setup
 
 1. Create virtual environment and activate it:
 ```bash
@@ -13,7 +17,7 @@ source venv/bin/activate  # Mac/Linux
 
 2. Install dependencies:
 ```bash
-pip install django djangorestframework django-cors-headers requests blockfrost-python python-dotenv
+pip install -r requirements.txt
 ```
 
 3. Create `.env` file in backend folder:
@@ -38,12 +42,13 @@ python manage.py runserver
 
 ## API Endpoints
 
-Base URL: `http://127.0.0.1:8000/api/`
+**Live Base URL:** `https://medisure-backend-t5yr.onrender.com/api/`
+**Local Base URL:** `http://127.0.0.1:8000/api/`
 
 ### Core Endpoints
 
 **POST /api/mint/**
-- Mint a new batch (called by blockchain after NFT creation)
+- Mint a new batch
 - Body:
 ```json
 {
@@ -74,12 +79,10 @@ Base URL: `http://127.0.0.1:8000/api/`
 ```
 
 **GET /api/verify/{qr_code}/**
-- Verify medicine authenticity (for patients)
-- Returns batch info + blockchain proof
+- Verify medicine authenticity
 
 **GET /api/journey/{batch_id}/**
 - Track batch through supply chain
-- Returns all transactions
 
 ### CRUD Endpoints
 
@@ -88,13 +91,3 @@ Base URL: `http://127.0.0.1:8000/api/`
 - `/api/pharmacies/` - Manage pharmacies
 - `/api/batches/` - Manage batches
 - `/api/transactions/` - View transactions
-
-## Admin Panel
-
-Access at `http://127.0.0.1:8000/admin/`
-
-## Notes
-
-- Using SQLite for hackathon (switch to PostgreSQL for production)
-- Blockfrost API key needed for blockchain verification
-- CORS enabled for localhost:3000 and localhost:5173
