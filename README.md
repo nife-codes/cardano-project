@@ -48,7 +48,7 @@ We built a decentralized Track-and-Trace system.
 
 Bash
 
-git clone https://github.com/[YOUR-USERNAME]/MediSure.git
+git clone https://github.com/nife-codes/cardano-project.git
 
 cd MediSure
 
