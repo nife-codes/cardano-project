@@ -32,20 +32,11 @@ class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
 
-
 @api_view(['POST'])
 def mint_batch(request):
-    """
-    Endpoint for minting a new batch
-    Joel will call this after NFT is minted on blockchain
-    """
     try:
-        
         batch_data = request.data
-        
-        
         qr_code = str(uuid.uuid4())
-        
         
         batch = Batch.objects.create(
             batch_id=batch_data['batch_id'],
@@ -61,7 +52,6 @@ def mint_batch(request):
             qr_code=qr_code
         )
         
-       
         Transaction.objects.create(
             batch=batch,
             transaction_type='MINT',
@@ -84,16 +74,11 @@ def mint_batch(request):
 
 @api_view(['GET'])
 def verify_medicine(request, qr_code):
-    """
-    Endpoint for patients to verify medicine authenticity
-    Patient scans QR code, we return batch info + blockchain proof
-    """
     try:
         from .blockfrost_utils import get_asset_info
         
         batch = Batch.objects.get(qr_code=qr_code)
         
-       
         blockchain_data = None
         if batch.policy_id and batch.asset_name:
             result = get_asset_info(batch.policy_id, batch.asset_name)
@@ -127,10 +112,6 @@ def verify_medicine(request, qr_code):
 
 @api_view(['GET'])
 def track_journey(request, batch_id):
-    """
-    Endpoint to track a batch's journey through supply chain
-    Returns all transactions for a batch
-    """
     try:
         batch = Batch.objects.get(batch_id=batch_id)
         transactions = Transaction.objects.filter(batch=batch).order_by('timestamp')
@@ -162,21 +143,14 @@ def track_journey(request, batch_id):
             'success': False,
             'error': str(e)
         }, status=status.HTTP_400_BAD_REQUEST)
-      
+
 @api_view(['POST'])
 def transfer_batch(request):
-    """
-    Endpoint for transferring batch between verified entities
-    Distributor or Pharmacy calls this after receiving the NFT
-    """
     try:
         from .blockfrost_utils import verify_wallet_has_asset
         
         transfer_data = request.data
-        
-        # Get the batch
         batch = Batch.objects.get(batch_id=transfer_data['batch_id'])
-        
         
         if batch.policy_id and batch.asset_name:
             verification = verify_wallet_has_asset(
@@ -191,7 +165,6 @@ def transfer_batch(request):
                     'error': 'Asset not found in receiving wallet'
                 }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Create transfer transaction record
         Transaction.objects.create(
             batch=batch,
             transaction_type='TRANSFER',
@@ -216,3 +189,48 @@ def transfer_batch(request):
             'success': False,
             'error': str(e)
         }, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def dashboard_stats(request):
+    try:
+        manufacturer_id = request.query_params.get('manufacturer_id')
+        
+        if not manufacturer_id:
+            return Response({'error': 'manufacturer_id required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        total_batches = Batch.objects.filter(manufacturer_id=manufacturer_id).count()
+        minted = Batch.objects.filter(manufacturer_id=manufacturer_id, nft_minted=True).count()
+        
+        manufacturer_batches = Batch.objects.filter(manufacturer_id=manufacturer_id)
+        in_transit = Transaction.objects.filter(
+            batch__in=manufacturer_batches, 
+            transaction_type='TRANSFER'
+        ).values('batch').distinct().count()
+        
+        batch_list = []
+        
+        for batch in manufacturer_batches:
+            if batch.nft_minted:
+                transfers = Transaction.objects.filter(batch=batch, transaction_type='TRANSFER').count()
+                status_text = "In Transit" if transfers > 0 else "Minted"
+            else:
+                status_text = "Pending"
+            
+            batch_list.append({
+                'batch_id': batch.batch_id,
+                'medicine_name': batch.medicine_name,
+                'composition': batch.composition,
+                'expiry_date': batch.expiry_date,
+                'status': status_text
+            })
+        
+        return Response({
+            'success': True,
+            'total_batches': total_batches,
+            'minted': minted,
+            'in_transit': in_transit,
+            'batches': batch_list
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

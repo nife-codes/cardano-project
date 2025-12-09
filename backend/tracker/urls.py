@@ -18,4 +18,5 @@ urlpatterns = [
     path('transfer/', views.transfer_batch, name='transfer-batch'),
     path('auth/signup/', signup, name='signup'),
     path('auth/signin/', signin, name='signin'),
+    path('dashboard/', views.dashboard_stats, name='dashboard-stats'),
 ]
