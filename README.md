@@ -1,7 +1,7 @@
 # MediSure
 ### Decentralized Pharmaceutical Verification on Cardano
 
-**🔗 [Live Demo](https://medisure-ebon.vercel.app/)** | ** [Backend API](https://medisure-backend-t5yr.onrender.com/api/)**
+**🔗 [Live Demo](https://medisure-ebon.vercel.app/)** | [Backend API](https://medisure-backend-t5yr.onrender.com/api/)
 
 ---
 
