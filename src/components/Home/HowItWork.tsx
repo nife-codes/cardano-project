@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
 import { CheckCircle, History, Scan } from "lucide-react";
 
-import scan from "../../assets/Containerscan-code.png";
-import verify from "../../assets/Containerverify-history.png";
-import confirm from "../../assets/Containerconfirm-authencity.png";
+import scan from "../../../public/Containerscan-code.png";
+import verify from "../../../public/Containerverify-history.png";
+import confirm from "../../../public/Containerconfirm-authencity.png";
 
 const HowItWork = () => {
   const cards = [
