@@ -1,7 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
-from .auth_views import signup, signin
 
 router = DefaultRouter()
 router.register(r'manufacturers', views.ManufacturerViewSet)
@@ -16,7 +15,5 @@ urlpatterns = [
     path('verify/<str:qr_code>/', views.verify_medicine, name='verify-medicine'),
     path('journey/<str:batch_id>/', views.track_journey, name='track-journey'),
     path('transfer/', views.transfer_batch, name='transfer-batch'),
-    path('auth/signup/', signup, name='signup'),
-    path('auth/signin/', signin, name='signin'),
     path('dashboard/', views.dashboard_stats, name='dashboard-stats'),
 ]
