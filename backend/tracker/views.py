@@ -1,13 +1,14 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Manufacturer, Distributor, Pharmacy, Batch, Transaction
+from .models import Manufacturer, Distributor, Pharmacy, Batch, Transaction, PharmacyInventory
 from .serializers import (
     ManufacturerSerializer, 
     DistributorSerializer, 
     PharmacySerializer, 
     BatchSerializer, 
-    TransactionSerializer
+    TransactionSerializer,
+    PharmacyInventorySerializer
 )
 import requests
 import uuid
@@ -31,6 +32,10 @@ class BatchViewSet(viewsets.ModelViewSet):
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
+
+class PharmacyInventoryViewSet(viewsets.ModelViewSet):
+    queryset = PharmacyInventory.objects.all()
+    serializer_class = PharmacyInventorySerializer
 
 @api_view(['POST'])
 def mint_batch(request):
@@ -230,6 +235,20 @@ def dashboard_stats(request):
             'minted': minted,
             'in_transit': in_transit,
             'batches': batch_list
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def pharmacy_inventory(request, pharmacy_id):
+    try:
+        inventory = PharmacyInventory.objects.filter(pharmacy_id=pharmacy_id, in_stock=True)
+        serializer = PharmacyInventorySerializer(inventory, many=True)
+        
+        return Response({
+            'success': True,
+            'inventory': serializer.data
         }, status=status.HTTP_200_OK)
         
     except Exception as e:

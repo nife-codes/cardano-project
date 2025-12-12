@@ -41,12 +41,12 @@ class Batch(models.Model):
     expiry_date = models.DateField()
     quantity = models.IntegerField()
     
-    # NFT/Blockchain data
+    
     policy_id = models.CharField(max_length=255, blank=True, null=True)
     asset_name = models.CharField(max_length=255, blank=True, null=True)
     nft_minted = models.BooleanField(default=False)
     
-    # QR code
+
     qr_code = models.CharField(max_length=255, unique=True, blank=True, null=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
@@ -71,3 +71,44 @@ class Transaction(models.Model):
     
     def __str__(self):
         return f"{self.transaction_type} - {self.batch.batch_id}"
+
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+class PharmacyInventory(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    pharmacy = models.ForeignKey(Pharmacy, on_delete=models.CASCADE, related_name='inventory')
+    batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
+    quantity_available = models.IntegerField(default=0)
+    price_per_unit = models.DecimalField(max_digits=10, decimal_places=2)
+    in_stock = models.BooleanField(default=True)
+    date_added = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ['pharmacy', 'batch']
+    
+    def __str__(self):
+        return f"{self.pharmacy.name} - {self.batch.medicine_name}"
+        
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    role = models.CharField(max_length=50, choices=[
+        ('manufacturer', 'Manufacturer'),
+        ('distributor', 'Distributor'),
+        ('pharmacy', 'Pharmacy'),
+        ('patient', 'Patient'),
+    ], default='patient')
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.role}"
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.profile.save()
