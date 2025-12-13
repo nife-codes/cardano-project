@@ -1,7 +1,8 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Manufacturer, Distributor, Pharmacy, Batch, Transaction, PharmacyInventory, Cart, CartItem, Order, OrderItem
+from django.contrib.auth.models import User
+from .models import Manufacturer, Distributor, Pharmacy, Batch, Transaction, PharmacyInventory, Cart, CartItem, Order, OrderItem, UserProfile
 from .serializers import (
     ManufacturerSerializer, 
     DistributorSerializer, 
@@ -442,6 +443,52 @@ def update_order_status(request, order_id):
         return Response({
             'success': True,
             'message': 'Order status updated'
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def get_user(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+        
+        return Response({
+            'success': True,
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'role': user.profile.role,
+                'date_joined': user.date_joined
+            }
+        }, status=status.HTTP_200_OK)
+        
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+def list_users_by_role(request):
+    try:
+        role = request.query_params.get('role')
+        
+        if role:
+            profiles = UserProfile.objects.filter(role=role)
+            users = [profile.user for profile in profiles]
+        else:
+            users = User.objects.all()
+        
+        user_list = [{
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'role': user.profile.role,
+            'date_joined': user.date_joined
+        } for user in users]
+        
+        return Response({
+            'success': True,
+            'users': user_list
         }, status=status.HTTP_200_OK)
         
     except Exception as e:

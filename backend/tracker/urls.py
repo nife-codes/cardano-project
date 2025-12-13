@@ -30,4 +30,6 @@ urlpatterns = [
     path('orders/<str:order_id>/', views.get_order, name='get-order'),
     path('orders/', views.get_user_orders, name='get-user-orders'),
     path('orders/<str:order_id>/status/', views.update_order_status, name='update-order-status'),
+    path('users/<int:user_id>/', views.get_user, name='get-user'),
+    path('users/', views.list_users_by_role, name='list-users'),
 ]
