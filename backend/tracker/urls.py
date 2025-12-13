@@ -21,4 +21,9 @@ urlpatterns = [
     path('auth/signin/', signin, name='signin'),
     path('dashboard/', views.dashboard_stats, name='dashboard-stats'),
     path('pharmacy/<str:pharmacy_id>/inventory/', views.pharmacy_inventory, name='pharmacy-inventory'),
+    path('cart/', views.get_cart, name='get-cart'),
+    path('cart/add/', views.add_to_cart, name='add-to-cart'),
+    path('cart/remove/<str:item_id>/', views.remove_from_cart, name='remove-from-cart'),
+    path('cart/update/<str:item_id>/', views.update_cart_item, name='update-cart-item'),
+    path('cart/clear/', views.clear_cart, name='clear-cart'),
 ]

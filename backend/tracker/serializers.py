@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Manufacturer, Distributor, Pharmacy, Batch, Transaction, PharmacyInventory
+from .models import Manufacturer, Distributor, Pharmacy, Batch, Transaction, PharmacyInventory, Cart, CartItem
 
 class ManufacturerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -37,4 +37,23 @@ class PharmacyInventorySerializer(serializers.ModelSerializer):
     
     class Meta:
         model = PharmacyInventory
+        fields = '__all__'
+
+class CartItemSerializer(serializers.ModelSerializer):
+    medicine_name = serializers.CharField(source='inventory_item.batch.medicine_name', read_only=True)
+    price_per_unit = serializers.DecimalField(source='inventory_item.price_per_unit', max_digits=10, decimal_places=2, read_only=True)
+    subtotal = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    pharmacy_name = serializers.CharField(source='inventory_item.pharmacy.name', read_only=True)
+    
+    class Meta:
+        model = CartItem
+        fields = '__all__'
+
+class CartSerializer(serializers.ModelSerializer):
+    items = CartItemSerializer(many=True, read_only=True)
+    total_price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    total_items = serializers.IntegerField(read_only=True)
+    
+    class Meta:
+        model = Cart
         fields = '__all__'

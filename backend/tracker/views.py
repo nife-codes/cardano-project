@@ -1,14 +1,16 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Manufacturer, Distributor, Pharmacy, Batch, Transaction, PharmacyInventory
+from .models import Manufacturer, Distributor, Pharmacy, Batch, Transaction, PharmacyInventory, Cart, CartItem
 from .serializers import (
     ManufacturerSerializer, 
     DistributorSerializer, 
     PharmacySerializer, 
     BatchSerializer, 
     TransactionSerializer,
-    PharmacyInventorySerializer
+    PharmacyInventorySerializer,
+    CartSerializer,
+    CartItemSerializer
 )
 import requests
 import uuid
@@ -249,6 +251,106 @@ def pharmacy_inventory(request, pharmacy_id):
         return Response({
             'success': True,
             'inventory': serializer.data
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def get_cart(request):
+    try:
+        user_id = request.query_params.get('user_id')
+        if not user_id:
+            return Response({'error': 'user_id required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        cart, created = Cart.objects.get_or_create(user_id=user_id)
+        serializer = CartSerializer(cart)
+        
+        return Response({
+            'success': True,
+            'cart': serializer.data
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def add_to_cart(request):
+    try:
+        user_id = request.data.get('user_id')
+        inventory_id = request.data.get('inventory_id')
+        quantity = request.data.get('quantity', 1)
+        
+        cart, created = Cart.objects.get_or_create(user_id=user_id)
+        inventory_item = PharmacyInventory.objects.get(id=inventory_id)
+        
+        if quantity > inventory_item.quantity_available:
+            return Response({'error': 'Not enough stock'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        cart_item, created = CartItem.objects.get_or_create(
+            cart=cart,
+            inventory_item=inventory_item,
+            defaults={'quantity': quantity}
+        )
+        
+        if not created:
+            cart_item.quantity += quantity
+            cart_item.save()
+        
+        return Response({
+            'success': True,
+            'message': 'Item added to cart'
+        }, status=status.HTTP_201_CREATED)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['DELETE'])
+def remove_from_cart(request, item_id):
+    try:
+        cart_item = CartItem.objects.get(id=item_id)
+        cart_item.delete()
+        
+        return Response({
+            'success': True,
+            'message': 'Item removed from cart'
+        }, status=status.HTTP_200_OK)
+        
+    except CartItem.DoesNotExist:
+        return Response({'error': 'Item not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['PUT'])
+def update_cart_item(request, item_id):
+    try:
+        cart_item = CartItem.objects.get(id=item_id)
+        quantity = request.data.get('quantity')
+        
+        if quantity > cart_item.inventory_item.quantity_available:
+            return Response({'error': 'Not enough stock'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        cart_item.quantity = quantity
+        cart_item.save()
+        
+        return Response({
+            'success': True,
+            'message': 'Cart updated'
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['DELETE'])
+def clear_cart(request):
+    try:
+        user_id = request.query_params.get('user_id')
+        cart = Cart.objects.get(user_id=user_id)
+        cart.items.all().delete()
+        
+        return Response({
+            'success': True,
+            'message': 'Cart cleared'
         }, status=status.HTTP_200_OK)
         
     except Exception as e:
