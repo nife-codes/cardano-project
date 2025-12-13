@@ -91,7 +91,72 @@ class PharmacyInventory(models.Model):
     
     def __str__(self):
         return f"{self.pharmacy.name} - {self.batch.medicine_name}"
-        
+
+class Cart(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cart')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"Cart - {self.user.username}"
+    
+    @property
+    def total_price(self):
+        return sum(item.subtotal for item in self.items.all())
+    
+    @property
+    def total_items(self):
+        return sum(item.quantity for item in self.items.all())
+
+class CartItem(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
+    inventory_item = models.ForeignKey(PharmacyInventory, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1)
+    added_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ['cart', 'inventory_item']
+    
+    def __str__(self):
+        return f"{self.cart.user.username} - {self.inventory_item.batch.medicine_name}"
+    
+    @property
+    def subtotal(self):
+        return self.quantity * self.inventory_item.price_per_unit
+
+class Order(models.Model):
+    ORDER_STATUS = [
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'),
+        ('processing', 'Processing'),
+        ('shipped', 'Shipped'),
+        ('delivered', 'Delivered'),
+        ('cancelled', 'Cancelled'),
+    ]
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
+    pharmacy = models.ForeignKey(Pharmacy, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=ORDER_STATUS, default='pending')
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Order {self.id} - {self.user.username}"
+
+class OrderItem(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    inventory_item = models.ForeignKey(PharmacyInventory, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+    price_per_unit = models.DecimalField(max_digits=10, decimal_places=2)
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.id} - {self.inventory_item.batch.medicine_name}"
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     role = models.CharField(max_length=50, choices=[

@@ -1,14 +1,19 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Manufacturer, Distributor, Pharmacy, Batch, Transaction, PharmacyInventory
+from django.contrib.auth.models import User
+from .models import Manufacturer, Distributor, Pharmacy, Batch, Transaction, PharmacyInventory, Cart, CartItem, Order, OrderItem, UserProfile
 from .serializers import (
     ManufacturerSerializer, 
     DistributorSerializer, 
     PharmacySerializer, 
     BatchSerializer, 
     TransactionSerializer,
-    PharmacyInventorySerializer
+    PharmacyInventorySerializer,
+    CartSerializer,
+    CartItemSerializer,
+    OrderSerializer,
+    OrderItemSerializer
 )
 import requests
 import uuid
@@ -249,6 +254,241 @@ def pharmacy_inventory(request, pharmacy_id):
         return Response({
             'success': True,
             'inventory': serializer.data
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def get_cart(request):
+    try:
+        user_id = request.query_params.get('user_id')
+        if not user_id:
+            return Response({'error': 'user_id required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        cart, created = Cart.objects.get_or_create(user_id=user_id)
+        serializer = CartSerializer(cart)
+        
+        return Response({
+            'success': True,
+            'cart': serializer.data
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def add_to_cart(request):
+    try:
+        user_id = request.data.get('user_id')
+        inventory_id = request.data.get('inventory_id')
+        quantity = request.data.get('quantity', 1)
+        
+        cart, created = Cart.objects.get_or_create(user_id=user_id)
+        inventory_item = PharmacyInventory.objects.get(id=inventory_id)
+        
+        if quantity > inventory_item.quantity_available:
+            return Response({'error': 'Not enough stock'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        cart_item, created = CartItem.objects.get_or_create(
+            cart=cart,
+            inventory_item=inventory_item,
+            defaults={'quantity': quantity}
+        )
+        
+        if not created:
+            cart_item.quantity += quantity
+            cart_item.save()
+        
+        return Response({
+            'success': True,
+            'message': 'Item added to cart'
+        }, status=status.HTTP_201_CREATED)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['DELETE'])
+def remove_from_cart(request, item_id):
+    try:
+        cart_item = CartItem.objects.get(id=item_id)
+        cart_item.delete()
+        
+        return Response({
+            'success': True,
+            'message': 'Item removed from cart'
+        }, status=status.HTTP_200_OK)
+        
+    except CartItem.DoesNotExist:
+        return Response({'error': 'Item not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['PUT'])
+def update_cart_item(request, item_id):
+    try:
+        cart_item = CartItem.objects.get(id=item_id)
+        quantity = request.data.get('quantity')
+        
+        if quantity > cart_item.inventory_item.quantity_available:
+            return Response({'error': 'Not enough stock'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        cart_item.quantity = quantity
+        cart_item.save()
+        
+        return Response({
+            'success': True,
+            'message': 'Cart updated'
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['DELETE'])
+def clear_cart(request):
+    try:
+        user_id = request.query_params.get('user_id')
+        cart = Cart.objects.get(user_id=user_id)
+        cart.items.all().delete()
+        
+        return Response({
+            'success': True,
+            'message': 'Cart cleared'
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def create_order(request):
+    try:
+        user_id = request.data.get('user_id')
+        pharmacy_id = request.data.get('pharmacy_id')
+        
+        cart = Cart.objects.get(user_id=user_id)
+        
+        if not cart.items.exists():
+            return Response({'error': 'Cart is empty'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        order = Order.objects.create(
+            user_id=user_id,
+            pharmacy_id=pharmacy_id,
+            total_amount=cart.total_price
+        )
+        
+        for cart_item in cart.items.all():
+            OrderItem.objects.create(
+                order=order,
+                inventory_item=cart_item.inventory_item,
+                quantity=cart_item.quantity,
+                price_per_unit=cart_item.inventory_item.price_per_unit,
+                subtotal=cart_item.subtotal
+            )
+            
+            inventory = cart_item.inventory_item
+            inventory.quantity_available -= cart_item.quantity
+            if inventory.quantity_available <= 0:
+                inventory.in_stock = False
+            inventory.save()
+        
+        cart.items.all().delete()
+        
+        return Response({
+            'success': True,
+            'order_id': str(order.id),
+            'message': 'Order created successfully'
+        }, status=status.HTTP_201_CREATED)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def get_order(request, order_id):
+    try:
+        order = Order.objects.get(id=order_id)
+        serializer = OrderSerializer(order)
+        
+        return Response({
+            'success': True,
+            'order': serializer.data
+        }, status=status.HTTP_200_OK)
+        
+    except Order.DoesNotExist:
+        return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+def get_user_orders(request):
+    try:
+        user_id = request.query_params.get('user_id')
+        orders = Order.objects.filter(user_id=user_id).order_by('-created_at')
+        serializer = OrderSerializer(orders, many=True)
+        
+        return Response({
+            'success': True,
+            'orders': serializer.data
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['PUT'])
+def update_order_status(request, order_id):
+    try:
+        order = Order.objects.get(id=order_id)
+        new_status = request.data.get('status')
+        
+        order.status = new_status
+        order.save()
+        
+        return Response({
+            'success': True,
+            'message': 'Order status updated'
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def get_user(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+        
+        return Response({
+            'success': True,
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'role': user.profile.role,
+                'date_joined': user.date_joined
+            }
+        }, status=status.HTTP_200_OK)
+        
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+def list_users_by_role(request):
+    try:
+        role = request.query_params.get('role')
+        
+        if role:
+            profiles = UserProfile.objects.filter(role=role)
+            users = [profile.user for profile in profiles]
+        else:
+            users = User.objects.all()
+        
+        user_list = [{
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'role': user.profile.role,
+            'date_joined': user.date_joined
+        } for user in users]
+        
+        return Response({
+            'success': True,
+            'users': user_list
         }, status=status.HTTP_200_OK)
         
     except Exception as e:
