@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Manufacturer, Distributor, Pharmacy, Batch, Transaction, PharmacyInventory, Cart, CartItem
+from .models import Manufacturer, Distributor, Pharmacy, Batch, Transaction, PharmacyInventory, Cart, CartItem, Order, OrderItem
 
 class ManufacturerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -56,4 +56,19 @@ class CartSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Cart
+        fields = '__all__'
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    medicine_name = serializers.CharField(source='inventory_item.batch.medicine_name', read_only=True)
+    
+    class Meta:
+        model = OrderItem
+        fields = '__all__'
+
+class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True, read_only=True)
+    pharmacy_name = serializers.CharField(source='pharmacy.name', read_only=True)
+    
+    class Meta:
+        model = Order
         fields = '__all__'

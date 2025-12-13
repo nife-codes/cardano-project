@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Manufacturer, Distributor, Pharmacy, Batch, Transaction, PharmacyInventory, Cart, CartItem
+from .models import Manufacturer, Distributor, Pharmacy, Batch, Transaction, PharmacyInventory, Cart, CartItem, Order, OrderItem
 from .serializers import (
     ManufacturerSerializer, 
     DistributorSerializer, 
@@ -10,7 +10,9 @@ from .serializers import (
     TransactionSerializer,
     PharmacyInventorySerializer,
     CartSerializer,
-    CartItemSerializer
+    CartItemSerializer,
+    OrderSerializer,
+    OrderItemSerializer
 )
 import requests
 import uuid
@@ -351,6 +353,95 @@ def clear_cart(request):
         return Response({
             'success': True,
             'message': 'Cart cleared'
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def create_order(request):
+    try:
+        user_id = request.data.get('user_id')
+        pharmacy_id = request.data.get('pharmacy_id')
+        
+        cart = Cart.objects.get(user_id=user_id)
+        
+        if not cart.items.exists():
+            return Response({'error': 'Cart is empty'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        order = Order.objects.create(
+            user_id=user_id,
+            pharmacy_id=pharmacy_id,
+            total_amount=cart.total_price
+        )
+        
+        for cart_item in cart.items.all():
+            OrderItem.objects.create(
+                order=order,
+                inventory_item=cart_item.inventory_item,
+                quantity=cart_item.quantity,
+                price_per_unit=cart_item.inventory_item.price_per_unit,
+                subtotal=cart_item.subtotal
+            )
+            
+            inventory = cart_item.inventory_item
+            inventory.quantity_available -= cart_item.quantity
+            if inventory.quantity_available <= 0:
+                inventory.in_stock = False
+            inventory.save()
+        
+        cart.items.all().delete()
+        
+        return Response({
+            'success': True,
+            'order_id': str(order.id),
+            'message': 'Order created successfully'
+        }, status=status.HTTP_201_CREATED)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def get_order(request, order_id):
+    try:
+        order = Order.objects.get(id=order_id)
+        serializer = OrderSerializer(order)
+        
+        return Response({
+            'success': True,
+            'order': serializer.data
+        }, status=status.HTTP_200_OK)
+        
+    except Order.DoesNotExist:
+        return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+def get_user_orders(request):
+    try:
+        user_id = request.query_params.get('user_id')
+        orders = Order.objects.filter(user_id=user_id).order_by('-created_at')
+        serializer = OrderSerializer(orders, many=True)
+        
+        return Response({
+            'success': True,
+            'orders': serializer.data
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['PUT'])
+def update_order_status(request, order_id):
+    try:
+        order = Order.objects.get(id=order_id)
+        new_status = request.data.get('status')
+        
+        order.status = new_status
+        order.save()
+        
+        return Response({
+            'success': True,
+            'message': 'Order status updated'
         }, status=status.HTTP_200_OK)
         
     except Exception as e:
