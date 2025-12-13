@@ -5,6 +5,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from tracker.models import Manufacturer, Pharmacy, Distributor
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -48,12 +49,24 @@ def signin(request):
             token, created = Token.objects.get_or_create(user=user)
             role = user.profile.role
             
+            entity_id = None
+            if role == 'manufacturer':
+                entity = Manufacturer.objects.filter(wallet_address__icontains=username).first()
+                entity_id = str(entity.id) if entity else None
+            elif role == 'pharmacy':
+                entity = Pharmacy.objects.filter(wallet_address__icontains=username).first()
+                entity_id = str(entity.id) if entity else None
+            elif role == 'distributor':
+                entity = Distributor.objects.filter(wallet_address__icontains=username).first()
+                entity_id = str(entity.id) if entity else None
+            
             return Response({
                 'success': True,
                 'token': token.key,
                 'user_id': user.id,
                 'username': user.username,
-                'role': role
+                'role': role,
+                'entity_id': entity_id
             }, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
