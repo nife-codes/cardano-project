@@ -165,6 +165,7 @@ class UserProfile(models.Model):
         ('pharmacy', 'Pharmacy'),
         ('patient', 'Patient'),
     ], default='patient')
+    entity_id = models.CharField(max_length=255, blank=True, null=True)
     
     def __str__(self):
         return f"{self.user.username} - {self.role}"
