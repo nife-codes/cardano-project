@@ -3,10 +3,19 @@ import "@meshsdk/react/styles.css";
 import type { AppProps } from "next/app";
 import { MeshProvider } from "@meshsdk/react";
 import { useEffect } from "react";
+import { AuthProvider } from "@/context/AuthContext";
+import { ToastContainer } from "react-toastify";
 
 export default function App({ Component, pageProps }: AppProps) {
   // Fix for Eternal wallet errors
   useEffect(() => {
+    window.addEventListener("error", (e) => {
+      console.log("Window error:", e.error);
+    });
+    window.addEventListener("unhandledrejection", (e) => {
+      console.log("Unhandled promise:", e.reason);
+    });
+
     // Suppress wallet-related errors that are safe to ignore
     const originalError = console.error;
     console.error = (...args: any[]) => {
@@ -69,8 +78,11 @@ export default function App({ Component, pageProps }: AppProps) {
   }, []);
 
   return (
-    <MeshProvider>
-      <Component {...pageProps} />
-    </MeshProvider>
+    <AuthProvider>
+      <MeshProvider>
+        <ToastContainer position="top-right" autoClose={3000} theme="colored" />
+        <Component {...pageProps} />
+      </MeshProvider>
+    </AuthProvider>
   );
 }

@@ -1,7 +1,6 @@
 import Head from "next/head";
 import { CardanoWallet, MeshBadge } from "@meshsdk/react";
 import { useState } from "react";
-import { div } from "framer-motion/client";
 import HowItWork from "@/components/Home/HowItWork";
 import Hero from "@/components/Home/Hero";
 // import Hero from "@/components/Home/Hero";

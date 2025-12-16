@@ -1,10 +1,17 @@
-"use client";
-
 import React from "react";
-import { CheckCircle, X, Package, Calendar, Beaker, Hash } from "lucide-react";
+import {
+  CheckCircle,
+  X,
+  Package,
+  Calendar,
+  Beaker,
+  Hash,
+  Pill,
+} from "lucide-react";
 
 interface FormData {
   batchId: string;
+  drugName: string;
   manufactureDate: string;
   expiryDate: string;
   chemicalComposition: string;
@@ -69,6 +76,23 @@ const CreateBatchModal = ({
                 value={formData.batchId}
                 onChange={handleInputChange}
                 placeholder="e.g., BATCH-2024-001"
+                className="w-full px-4 py-3.5 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all text-gray-900 placeholder:text-gray-400 font-medium"
+                required
+              />
+            </div>
+
+            {/* Drug Name - ADDED THIS FIELD */}
+            <div>
+              <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
+                <Pill className="w-4 h-4 mr-2 text-blue-600" />
+                Drug/Medicine Name <span className="text-red-500 ml-1">*</span>
+              </label>
+              <input
+                type="text"
+                name="drugName"
+                value={formData.drugName}
+                onChange={handleInputChange}
+                placeholder="e.g., Paracetamol, Aspirin, Amoxicillin"
                 className="w-full px-4 py-3.5 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all text-gray-900 placeholder:text-gray-400 font-medium"
                 required
               />
