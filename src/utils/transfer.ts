@@ -7,7 +7,7 @@ export async function transferDrugBatch(
   policyId: string,
   assetNameHex: string
 ) {
-  console.log("🚚 Starting Transfer...");
+  console.log(" Starting Transfer...");
 
   // 1. Get Wallet Info
   const changeAddress = await wallet.getChangeAddress();
@@ -22,7 +22,7 @@ export async function transferDrugBatch(
 
   const tx = await txBuilder
     .txOut(recipientAddress, [
-      { unit: "lovelace", quantity: "2000000" }, // Send 2 ADA (Min required to carry token)
+      { unit: "lovelace", quantity: "20000" }, // Send 2 ADA (Min required to carry token)
       { unit: policyId + assetNameHex, quantity: "1" }, // The Token itself
     ])
     .changeAddress(changeAddress)

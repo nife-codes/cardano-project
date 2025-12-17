@@ -1,54 +1,95 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react"; // 👈 Import useEffect
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import VerificationIcon from "@/shared/VerificationIcon";
 import bg from "../../../public/hero-banner.jpg";
+import QrScanner from "./QrScanner";
+import { useSearchParams } from "next/navigation"; // 👈 Import useSearchParams
 
 const Hero = () => {
   const router = useRouter();
+  const searchParams = useSearchParams(); // 👈 Initialize searchParams
+
   const [input, setInput] = useState("");
   const [showScanner, setShowScanner] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  // State to prevent re-running verification on subsequent renders
+  const [initialVerifyDone, setInitialVerifyDone] = useState(false);
 
-  // Handle code verification
-  const handleVerifyCode = async () => {
-    if (!input) return;
+  // --- Core Verification Handler ---
+  const handleVerifyCode = async (codeToVerify: string) => {
+    if (!codeToVerify) return;
 
+    // Use a temporary variable to hold the original state if needed later,
+    // but for now, just set the verification state
     setVerifying(true);
+    setInput(codeToVerify);
 
     try {
-      // Call backend API
-      const response = await fetch(`/api/verify_drug?assetId=${input}`);
+      // 1. CALL THE API
+      const response = await fetch(`/api/verify_drug?assetId=${codeToVerify}`);
       const data = await response.json();
 
-      // Navigate to result page with data
+      // 2. NAVIGATE TO RESULT PAGE
       if (data.isValid) {
-        router.push(`/verified?batchId=${input}`);
+        // Success
+        router.push(`/verified?batchId=${codeToVerify}`);
       } else {
-        router.push(`/verified?error=not-found&batchId=${input}`);
+        // Not valid or not found on the blockchain
+        router.push(`/verified?error=not-found&batchId=${codeToVerify}`);
       }
     } catch (error) {
-      router.push(`/verified?error=network&batchId=${input}`);
+      // Network or API route error
+      console.error("Verification Error:", error);
+      router.push(`/verified?error=network&batchId=${codeToVerify}`);
     } finally {
       setVerifying(false);
+      setShowScanner(false);
     }
   };
 
-  // Fake QR scanning simulation
+  // --- AUTOMATIC URL VERIFICATION CHECK ---
+  useEffect(() => {
+    // Read the query parameter 'assetId' from the URL
+    const assetIdFromUrl = searchParams.get("assetId");
+
+    // Check if we have an assetId and haven't run the initial verification yet
+    if (assetIdFromUrl && !initialVerifyDone) {
+      setInitialVerifyDone(true); // Mark as done immediately
+      // 3. Trigger verification with the code found in the URL
+      handleVerifyCode(assetIdFromUrl);
+
+      // OPTIONAL: Clean the URL after verification starts (nice UX)
+      // Note: This won't reload the page.
+      router.replace(window.location.pathname, undefined);
+    }
+  }, [searchParams, initialVerifyDone, router]); // Dependency array includes necessary values
+
+  // --- Manual Input Handler ---
+  const handleManualVerify = () => {
+    // Pass the current input state to the core handler
+    handleVerifyCode(input);
+  };
+
+  // --- Scanner Callbacks ---
+  const handleScanSuccess = (decodedText: string) => {
+    // Pass the decoded QR code text to the core handler
+    handleVerifyCode(decodedText);
+  };
+
   const startScan = () => {
     setShowScanner(true);
-    setTimeout(() => {
-      setShowScanner(false);
-      // Simulate scanning a code
-      setInput("BATCH-2024-001");
-    }, 3000);
+  };
+
+  const closeScanner = () => {
+    setShowScanner(false);
   };
 
   return (
     <div className="relative h-screen flex items-center justify-center px-4 mt-8">
-      {/* Background Image */}
+      {/* Background Image and Overlay (unchanged) */}
       <Image
         src={bg}
         alt="Hero background"
@@ -58,8 +99,6 @@ const Hero = () => {
         quality={90}
         style={{ zIndex: -2 }}
       />
-
-      {/* Overlay */}
       <div
         className="absolute inset-0 bg-black opacity-40"
         style={{ zIndex: -1 }}
@@ -70,14 +109,12 @@ const Hero = () => {
         className="relative max-w-lg w-full text-center flex flex-col items-center"
         style={{ zIndex: 10 }}
       >
-        {/* ICON */}
+        {/* ICON, Title, Description (unchanged) */}
         <div className="w-full flex justify-center">
           <div className="animate-bounce">
             <VerificationIcon />
           </div>
         </div>
-
-        {/* Title */}
         <h2 className="text-white text-3xl md:text-4xl font-semibold mt-6">
           Verify Your Medicine
         </h2>
@@ -85,10 +122,12 @@ const Hero = () => {
           Ensure your medication is genuine and safe with a quick scan.
         </p>
 
-        {/* QR Scan Button */}
+        {/* QR Scan Button - Triggers the real scanner */}
         <button
           onClick={startScan}
-          className="w-full text-white py-4 px-6 mt-6 rounded-lg transition hover:opacity-90"
+          // Disabled while verifying from QR scan or manual input
+          disabled={verifying}
+          className="w-full text-white py-4 px-6 mt-6 rounded-lg transition hover:opacity-90 disabled:opacity-50"
           style={{ backgroundColor: "#2563eb" }}
         >
           Scan QR Code to Verify
@@ -112,16 +151,18 @@ const Hero = () => {
 
           <input
             type="text"
-            placeholder="e.g. BATCH-2024-001"
+            placeholder="e.g. BATCH-2024-001 or Policy ID"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleVerifyCode()}
+            onKeyPress={(e) => e.key === "Enter" && handleManualVerify()}
+            // The input field is disabled if verification is ongoing (e.g., from URL)
+            disabled={verifying}
             className="mt-4 border border-transparent rounded-lg p-3 w-full focus:outline-none focus:ring-2"
             style={{ backgroundColor: "#F3F3F5" }}
           />
 
           <button
-            onClick={handleVerifyCode}
+            onClick={handleManualVerify}
             disabled={verifying || !input}
             className="w-full text-white py-3 px-6 mt-4 rounded-lg transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ backgroundColor: "#2563eb" }}
@@ -141,34 +182,9 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* QR Scan Modal */}
+      {/* Real QR Scan Component */}
       {showScanner && (
-        <div
-          className="fixed inset-0 flex items-center justify-center z-50"
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.6)" }}
-        >
-          <div className="bg-white p-8 rounded-xl shadow-xl w-80 text-center relative">
-            <h2
-              className="text-lg font-semibold mb-4"
-              style={{ color: "#101828" }}
-            >
-              Scanning QR Code...
-            </h2>
-
-            {/* Fake scanning animation */}
-            <div className="w-full h-40 bg-gray-200 rounded-lg overflow-hidden relative">
-              <div
-                className="absolute inset-0 animate-pulse"
-                style={{
-                  background:
-                    "linear-gradient(to bottom, transparent, rgba(37, 99, 235, 0.4), transparent)",
-                }}
-              ></div>
-            </div>
-
-            <p className="mt-4 text-gray-600 text-sm">Please wait...</p>
-          </div>
-        </div>
+        <QrScanner onScanSuccess={handleScanSuccess} onClose={closeScanner} />
       )}
     </div>
   );
